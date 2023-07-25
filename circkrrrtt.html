@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Live Cricket Match</title>
+  <script>
+    function sleepFor(sleepDuration) {
+      return new Promise(resolve => setTimeout(resolve, sleepDuration));
+    }
+
+    function getRandomNumber(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function showCoolMessage() {
+      var messages = ["What a shot!", "That's a massive hit!", "The crowd goes wild!", "Superb shot!"];
+      var randomIndex = Math.floor(Math.random() * messages.length);
+      document.getElementById("output").innerHTML += messages[randomIndex] + "<br/>";
+    }
+
+    async function playInning(team, overs) {
+      document.getElementById("output").innerHTML += overs + " Overs match started, " + team + " is to bat." + "<br/>";
+
+      var totalScore = 0;
+      var wickets = 0;
+      var currentPlayer = "Player 1";
+      var balls = 0;
+
+      for (var over = 1; over <= overs; over++) {
+        document.getElementById("output").innerHTML += "Over #" + over + " started" + "<br/>";
+
+        for (var ball = 1; ball <= 6; ball++) {
+          var randomScore = getRandomNumber(0, 6);
+
+          if (randomScore === 0) {
+            document.getElementById("output").innerHTML += "It's out!" + "<br/>";
+            wickets++;
+            if (wickets === 10) {
+              break;
+            }
+          } else if (randomScore === 4 || randomScore === 6) {
+            await sleepFor(1000);
+            showCoolMessage();
+            totalScore += randomScore;
+          } else {
+            await sleepFor(1000);
+            totalScore += randomScore;
+            document.getElementById("output").innerHTML += currentPlayer + " scored " + randomScore + " run(s)" + "<br/>";
+            currentPlayer = currentPlayer === "Player 1" ? "Player 2" : "Player 1";
+          }
+          balls++;
+
+          await sleepFor(2000);
+        }
+
+        document.getElementById("output").innerHTML += "Score: " + totalScore + " / " + wickets + "<br/>";
+
+        if (wickets === 10) {
+          break;
+        }
+      }
+
+      return { score: totalScore, wickets: wickets, balls: balls };
+    }
+
+    async function playMatch() {
+      var overs = parseInt(prompt("Enter the number of overs:"));
+      var team1 = prompt("Enter the name of Team 1:");
+      var team2 = prompt("Enter the name of Team 2:");
+
+      document.getElementById("output").innerHTML += "The match is between two teams: " + team1 + " and " + team2 + "<br/>";
+      await sleepFor(1000);
+
+      document.getElementById("output").innerHTML += "Toss between " + team1 + " and " + team2 + "<br/>";
+      await sleepFor(3000);
+
+      var tossWinner = Math.random() < 0.5 ? team1 : team2;
+      var batFirstTeam = tossWinner;
+
+      document.getElementById("output").innerHTML += tossWinner + " won the toss and will bat first." + "<br/>";
+      await sleepFor(1000);
+
+      var team1Inning = await playInning(batFirstTeam, overs);
+
+      document.getElementById("output").innerHTML += "First inning ended. " + team1 + " scored " + team1Inning.score + " runs with " + team1Inning.wickets + " wickets in " + team1Inning.balls + " balls." + "<br/>";
+
+      var target = team1Inning.score + 1;
+
+      document.getElementById("output").innerHTML += team2 + " needs " + target + " runs to win in " + overs + " overs." + "<br/>";
+
+      var team2Inning = await playInning(team2, overs);
+
+      document.getElementById("output").innerHTML += "Second inning ended. " + team2 + " scored " + team2Inning.score + " runs with " + team2Inning.wickets + " wickets in " + team2Inning.balls + " balls." + "<br/>";
+
+      var team2Score = team2Inning.score;
+
+      if (team2Score >= target) {
+        document.getElementById("output").innerHTML += team2 + " won the match by " + (10 - team2Inning.wickets) + " wickets." + "<br/>";
+      } else {
+        document.getElementById("output").innerHTML += team1 + " won the match by " + (target - team2Score) + " runs." + "<br/>";
+      }
+    }
+  </script>
+</head>
+<body>
+  <button onclick="playMatch()">Start Match</button>
+  <div id="output"></div>
+</body>
+</html>
